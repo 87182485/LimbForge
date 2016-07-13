@@ -20,7 +20,9 @@ var HandLoader = function(manifest,design){
         // This function assumes there's one display model which is scaled and mirrored for the user's benefit.
         // This display model is NOT THE SAME as the files that are downloaded for printing.
         var loader = new THREE.STLLoader();
-        loader.load( design.directory + manifest["displayModel"], function ( geometry, data ) {
+//        loader.load( design.directory + "1mm_cube.stl", 
+				loader.load( design.directory + manifest["displayModel"],
+										function ( geometry, data ) {
 
             var material = new THREE.MeshPhongMaterial( { color: 0xff5533, specular: 0x111111, shininess: 200 } );
             material.side = THREE.DoubleSide;
@@ -34,7 +36,7 @@ var HandLoader = function(manifest,design){
 
             // Manipulate the mesh according to display pref's, specifically "hand" (if it needs to be mirrored) and
             // "size" to zoom it with reference to a fixed grid
-            mesh.rotation.set(-Math.PI*0.45,0,0 );
+						mesh.rotation.set(-Math.PI*0.45,0,0 );
             mesh.position.set(0,0,0);
 
             scene.add( mesh );

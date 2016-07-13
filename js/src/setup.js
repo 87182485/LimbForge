@@ -43,7 +43,7 @@ function init() {
     controls.addEventListener( 'change', render ); // add this only if there is no animation loop (requestAnimationFrame)
     controls.enablePan = true;
     controls.target.set(0,0,0);
-    controls.minDistance = 100;
+    controls.minDistance = 1;
     controls.enableZoom = true;
 
     // Axis helper for my own reference
@@ -114,9 +114,10 @@ function clearScene(){
 
 function loadImage(imagePath){ //Dev-added Method
   //load the image as a material
-  var img = new THREE.MeshBasicMaterial({
-    map:THREE.ImageUtils.loadTexture(imagePath)
-  });
+//  var image = THREE.ImageUtils.loadTexture(imagePath);
+	var image = THREE.TextureLoader().load(imagePath);
+	console.log("image:", image);
+  var img = new THREE.MeshBasicMaterial({ map: image });
   img.map.needsUpdate = true;
   img.transparent = false;
   img.opacity = 0.8;
