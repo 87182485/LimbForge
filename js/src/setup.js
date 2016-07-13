@@ -115,7 +115,8 @@ function clearScene(){
 function loadImage(imagePath){ //Dev-added Method
   //load the image as a material
 //  var image = THREE.ImageUtils.loadTexture(imagePath);
-	var image = THREE.TextureLoader().load(imagePath);
+	var loader = new THREE.TextureLoader();
+	var image = loader.load(imagePath);
 	console.log("image:", image);
   var img = new THREE.MeshBasicMaterial({ map: image });
   img.map.needsUpdate = true;
