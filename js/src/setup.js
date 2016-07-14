@@ -67,11 +67,13 @@ function init() {
 
 function onKeyDown(event)
 {
-	console.log(event);
-	switch(event.keyCode)
+	switch(event.key)
 	{
 		case "x":
-			console.log("got x");
+			controls.enabled = false;
+			break;
+		case "y":
+			controls.enabled = true;
 			break;
 		default:
 			return;
