@@ -81,13 +81,17 @@ $(document).ready(function(){
         downloadHand();
     });
 
-    //Upload Image Button
+    //Upload Image Button invokes the file picker
     $('#refBtn').click(function(e){
-			console.log("upload image");
         e.preventDefault();
-        loadReferenceImage();
+		$('input').name = $('input').click();
     });
 
+	// invoke load reference image when the file picker is done
+	$('input').change(function(e) {
+		loadReferenceImage(e);
+	});
+	
 	//Request New Design Help Button
 	$('#designBtn').click(function(e){
 		e.preventDefault();
@@ -165,11 +169,13 @@ $(document).ready(function(){
         });
     }
 
-    function loadReferenceImage() {
-        var filesSelected = ($("#fileItem"))[0].files;
-        if (filesSelected.length > 0)
+    function loadReferenceImage(evt) {
+		var files = evt.target.files;
+        //var filesSelected = ($("#fileItem"))[0].files;
+		//var filesSelected = $('input[type=file]').val();
+        if (files.length > 0)
         {
-            var fileToLoad = filesSelected[0];
+            var fileToLoad = files[0];
 
             if (fileToLoad.type.match("image.*"))
             {
