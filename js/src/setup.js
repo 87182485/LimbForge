@@ -86,8 +86,6 @@ function init() {
 
 function onMouseDown(event)
 {
-	if(controls.enabled === true)
-		return;
 	imageState.state = 'mousedown';
 	raycaster.setFromCamera(mouse, camera);
 	var intersects = raycaster.intersectObjects([refImage]);
@@ -116,15 +114,11 @@ function onMouseDown(event)
 
 function onMouseUp(event)
 {
-	if(controls.enabled === true)
-		return;
 	imageState.state = 'mouseup';
 }
 
 function onMouseMove(event)
 {
-	if(controls.enabled === true)
-		return;
 	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
