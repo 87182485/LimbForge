@@ -4,7 +4,23 @@ if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 var container, controls;
 
 var camera, cameraTarget, scene, renderer;
-var refImage;
+var refImage, newImageSize;
+
+var raycaster = new THREE.Raycaster();
+var mouse = new THREE.Vector2();
+var sphereGeometry = new THREE.SphereGeometry(1);
+var imageState = {
+	state: undefined,
+	imageClick: new THREE.Vector2(),
+	worldClick: new THREE.Vector2(),
+	cylinderSize: new THREE.Vector3(.5, .5, 1),
+};
+var cylinderGeometry = new THREE.CylinderGeometry(
+	imageState.cylinderSize.x,
+	imageState.cylinderSize.y,
+	imageState.cylinderSize.z,
+	32);
+var cylinder;
 
 //Grid size and step in mm
 var gridSize = 200;
@@ -63,7 +79,63 @@ function init() {
 
     window.addEventListener( 'resize', onWindowResize, false );
 		window.addEventListener('keydown', onKeyDown, false);
+		document.addEventListener('mousedown', onMouseDown, false);
+		document.addEventListener('mouseup', onMouseUp, false);
+		document.addEventListener('mousemove', onMouseMove, false);
 }
+
+function onMouseDown(event)
+{
+	if(controls.enabled === true)
+		return;
+	imageState.state = 'mousedown';
+	raycaster.setFromCamera(mouse, camera);
+	var intersects = raycaster.intersectObjects([refImage]);
+	if(intersects.length > 0)
+	{
+		//The point we clicked on is in world coordinates so we need to
+		// translate this to image coordinates; also the world coordinates
+		// are strangely rotated so we have to swap them around.
+		imageState.worldClick.copy(intersects[0].point);
+		imageState.imageClick.set(
+			newImageSize.x/2 + intersects[0].point.x,
+			newImageSize.y/2 - intersects[0].point.z);
+		console.log("Clicked on the refImage:", intersects[0].point,
+								imageState.imageClick);
+		var material = new THREE.MeshPhongMaterial( { color: 0xff0000, specular: 0x111111, shininess: 200 } );
+		var sphere = new THREE.Mesh(sphereGeometry, material);
+		cylinder = new THREE.Mesh(cylinderGeometry, material);
+		sphere.position.copy(intersects[0].point);
+		cylinder.position.copy(intersects[0].point);
+		cylinder.rotateZ(Math.PI * .5);
+		scene.add(sphere);
+		scene.add(cylinder);
+		render();
+	}
+}
+
+function onMouseUp(event)
+{
+	if(controls.enabled === true)
+		return;
+	imageState.state = 'mouseup';
+}
+
+function onMouseMove(event)
+{
+	if(controls.enabled === true)
+		return;
+	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+	if(imageState.state == 'mousedown')
+	{
+		cylinder.scale.set(1,
+			Math.abs(imageState.worldClick.distanceTo()), 1);
+	}
+
+}
+
 
 function onKeyDown(event)
 {
@@ -160,12 +232,16 @@ function loadImage(imagePath){
 				w = gridSize/aspect;
 			}
 			console.log("New size:", w, h);
+			newImageSize = new THREE.Vector2(w, h);
 
 			//create the refImage with the image material and place it
-			var refImage = new THREE.Mesh(new THREE.PlaneGeometry(w, h), img);
+			refImage = new THREE.Mesh(new THREE.PlaneGeometry(w, h), img);
 			refImage.overdraw = true;
 			refImage.rotation.set(-Math.PI*0.5,0,0 );
 			refImage.position.set(0,1,0);
+
+			refImage.originalWidth  = texture.image.width;
+			refImage.originalHeight = texture.image.height;
 
 			//add the new refImage to the scene
 			scene.add(refImage);
