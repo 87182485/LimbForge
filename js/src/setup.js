@@ -4,6 +4,11 @@ if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 var container, controls;
 
 var camera, cameraTarget, scene, renderer;
+var refImage;
+
+//Grid size and step in mm
+var gridSize = 200;
+var gridStep = 10;
 
 init();
 //animate();
@@ -51,16 +56,26 @@ function init() {
     scene.add( axisHelper );
 
     // Grid for scale reference
-    var gridHelper = new THREE.GridHelper( 200, 10 ); // THREE.GridHelper(size,step)
+    var gridHelper = new THREE.GridHelper( gridSize, gridStep ); // THREE.GridHelper(size,step)
     scene.add( gridHelper );
 
     container.appendChild( renderer.domElement );
 
     window.addEventListener( 'resize', onWindowResize, false );
+		window.addEventListener('keydown', onKeyDown, false);
+}
 
-
-
-    //renderer.render();
+function onKeyDown(event)
+{
+	console.log(event);
+	switch(event.keyCode)
+	{
+		case "x":
+			console.log("got x");
+			break;
+		default:
+			return;
+	}
 }
 
 function addShadowedLight( x, y, z, color, intensity ) {
@@ -112,27 +127,49 @@ function clearScene(){
     render();
 }
 
-function loadImage(imagePath){ //Dev-added Method
-  //load the image as a material
-//  var image = THREE.ImageUtils.loadTexture(imagePath);
-	var loader = new THREE.TextureLoader();
-	var image = loader.load(imagePath);
-	console.log("image:", image);
-  var img = new THREE.MeshBasicMaterial({ map: image });
-  img.map.needsUpdate = true;
-  img.transparent = false;
-  img.opacity = 0.8;
-  img.side = THREE.DoubleSide;
+function loadImage(imagePath){
+	var loader = new THREE.ImageLoader();
+	var texture;
+	var image = loader.load(imagePath,
+		function(image)
+		{
+			texture = new THREE.Texture();
+			texture.minFilter = THREE.LinearFilter
+			texture.image = image;
+			texture.needsUpdate = true;
+			var img = new THREE.MeshBasicMaterial({ map: texture });
+			img.map.needsUpdate = true;
+			img.transparent = false;
+			img.opacity = 0.8;
+			img.side = THREE.DoubleSide;
 
-  //create the plane with the image material and place it
-  var plane = new THREE.Mesh(new THREE.PlaneGeometry(250, 250),img);
-  plane.overdraw = true;
-  plane.rotation.set(-Math.PI*0.5,0,0.3 );
-  plane.position.set(66,6,-40);
+			var w = texture.image.width;
+			var h = texture.image.height;
+			var aspect = w/h;
 
-  //add the new plane to the scene
-  scene.add(plane);
-  setTimeout("render();",500);
+			if(w > gridSize)
+			{
+				w = gridSize;
+				h = gridSize/aspect;
+			}
+			if(h > gridSize)
+			{
+				h = gridSize;
+				w = gridSize/aspect;
+			}
+			console.log("New size:", w, h);
+
+			//create the refImage with the image material and place it
+			var refImage = new THREE.Mesh(new THREE.PlaneGeometry(w, h), img);
+			refImage.overdraw = true;
+			refImage.rotation.set(-Math.PI*0.5,0,0 );
+			refImage.position.set(0,1,0);
+
+			//add the new refImage to the scene
+			scene.add(refImage);
+			setTimeout("render();",500);
+		}
+	);
 }
 
 //function animate() {
