@@ -57,7 +57,9 @@ function init() {
     renderer.gammaOutput = true;
 
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.cullFace = THREE.CullFaceBack;
+	//deprecated
+    //renderer.shadowMap.cullFace = THREE.CullFaceBack;
+	renderer.shadowMap.renderReverseSided = false;
 
     // Orbit Controls
     controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -93,7 +95,7 @@ function onMouseDown(event) {
 	raycaster.setFromCamera(mouse, camera);
 
 	if (refImage) {
-		var intersects = raycaster.intersectObjects(refImage);
+		var intersects = raycaster.intersectObjects([refImage]);
 
 		if (intersects.length > 0) {
 			//The point we clicked on is in world coordinates so we need to
@@ -157,18 +159,18 @@ function addShadowedLight(x, y, z, color, intensity) {
     // directionalLight.shadowCameraVisible = true;
 
     var d = 1;
-    directionalLight.shadowCameraLeft = -d;
-    directionalLight.shadowCameraRight = d;
-    directionalLight.shadowCameraTop = d;
-    directionalLight.shadowCameraBottom = -d;
+    directionalLight.shadow.camera.left = -d;
+    directionalLight.shadow.camera.right = d;
+    directionalLight.shadow.camera.top = d;
+    directionalLight.shadow.camera.bottom = -d;
 
-    directionalLight.shadowCameraNear = 1;
-    directionalLight.shadowCameraFar = 4;
+    directionalLight.shadow.camera.near = 1;
+    directionalLight.shadow.camera.far = 4;
 
-    directionalLight.shadowMapWidth = 1024;
-    directionalLight.shadowMapHeight = 1024;
+    directionalLight.shadow.mapSize.width = 1024;
+    directionalLight.shadow.mapSize.height = 1024;
 
-    directionalLight.shadowBias = -0.005;
+    directionalLight.shadow.bias = -0.005;
 
 }
 
