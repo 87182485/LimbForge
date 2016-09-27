@@ -1,4 +1,3 @@
-
 'use strict';
 
 if (!Detector.webgl) Detector.addGetWebGLMessage();
@@ -42,16 +41,6 @@ function init() {
     cameraTarget = new THREE.Vector3(0, 0, 0);
 
     scene = new THREE.Scene();
-
-	var fontLoader = new THREE.FontLoader();
-	fontLoader.load('js/lib/helvetiker_regular.typeface.json', function(font){
-		var mesh = new THREE.Mesh(createMarkerFont(font));
-		mesh.position.x = 100;
-		mesh.position.y = 100;
-		mesh.position.z = 100;		
-		scene.add(mesh);
-	});
-
     // Lights
 
     scene.add(new THREE.HemisphereLight(0x443333, 0x111122));
@@ -102,26 +91,30 @@ function init() {
 function onMouseDown(event) {
 	imageState.state = 'mousedown';
 	raycaster.setFromCamera(mouse, camera);
-	var intersects = raycaster.intersectObjects([refImage]);
-	if (intersects.length > 0) {
-		//The point we clicked on is in world coordinates so we need to
-		// translate this to image coordinates; also the world coordinates
-		// are strangely rotated so we have to swap them around.
-		imageState.worldClick.copy(intersects[0].point);
-		imageState.imageClick.set(
-			newImageSize.x / 2 + intersects[0].point.x,
-			newImageSize.y / 2 - intersects[0].point.z);
-		console.log("Clicked on the refImage:", intersects[0].point,
-			imageState.imageClick);
-		var material = new THREE.MeshPhongMaterial({ color: 0xff0000, specular: 0x111111, shininess: 200 });
-		var sphere = new THREE.Mesh(sphereGeometry, material);
-		cylinder = new THREE.Mesh(cylinderGeometry, material);
-		sphere.position.copy(intersects[0].point);
-		cylinder.position.copy(intersects[0].point);
-		cylinder.rotateZ(Math.PI * .5);
-		scene.add(sphere);
-		scene.add(cylinder);
-		render();
+
+	if (refImage) {
+		var intersects = raycaster.intersectObjects(refImage);
+
+		if (intersects.length > 0) {
+			//The point we clicked on is in world coordinates so we need to
+			// translate this to image coordinates; also the world coordinates
+			// are strangely rotated so we have to swap them around.
+			imageState.worldClick.copy(intersects[0].point);
+			imageState.imageClick.set(
+				newImageSize.x / 2 + intersects[0].point.x,
+				newImageSize.y / 2 - intersects[0].point.z);
+			console.log("Clicked on the refImage:", intersects[0].point,
+				imageState.imageClick);
+			var material = new THREE.MeshPhongMaterial({ color: 0xff0000, specular: 0x111111, shininess: 200 });
+			var sphere = new THREE.Mesh(sphereGeometry, material);
+			cylinder = new THREE.Mesh(cylinderGeometry, material);
+			sphere.position.copy(intersects[0].point);
+			cylinder.position.copy(intersects[0].point);
+			cylinder.rotateZ(Math.PI * .5);
+			scene.add(sphere);
+			scene.add(cylinder);
+			render();
+		}
 	}
 }
 
@@ -133,7 +126,7 @@ function onMouseMove(event) {
 	mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
 	mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
 
-	if (imageState.state == 'mousedown') {
+	if (imageState.state == 'mousedown' && refImage) {
 		cylinder.scale.set(1,
 			Math.abs(imageState.worldClick.distanceTo()), 1);
 	}
@@ -250,7 +243,6 @@ function loadImage(imagePath) {
 }
 
 function drawRuler(yPosition) {
-
 	var material = new THREE.LineBasicMaterial({
         color: 0x0000ff
     });
@@ -264,9 +256,11 @@ function drawRuler(yPosition) {
 	var rulerLength = gridSize * 2;
 
 	for (var i = 0, length = rulerLength; i <= length; i++) {
-		var markLength = i % 5 == 0 ? 5 : 3;
+		var markLength = i % 5 === 0 ? i % 10 ? 4 : 6 : 3;
 		line.add(createRulerMark(i, yPosition, markLength));
 	}
+
+	line.add(loadFont(1, -200, 0, 200, 7.5, 0, 7.5));
 
 	return line;
 }
@@ -284,13 +278,36 @@ function createRulerMark(x, y, z) {
 	return line
 }
 
-function createMarkerFont(font) {
-	return new THREE.TextGeometry('0', {
+function createMarkerFont(text, font) {
+	return new THREE.TextGeometry(text, {
 		font: font,
-		size: 11,
-		height: 20,
-		curverSegments: 2
+		size: 3,
+		height: 1,
+		weight: 'normal',
+		curverSegments: 2,
 	});
+}
+
+function loadFont(text, x, y, z, xOffset, yOffset, zOffset, xRotation) {
+	var fontLoader = new THREE.FontLoader();
+	var group = new THREE.Group();
+	fontLoader.load('js/lib/helvetiker_regular.typeface.json', function (font) {
+		var unit = 10; //a number per 10mm (1cm)
+		var material = new THREE.MeshBasicMaterial({ color: 0x000000, overdraw: 0.5 });
+
+		for (var i = 1, length = gridSize * 2 / 10; i <= length; i++) {
+			var textGeometry = createMarkerFont(i, font);
+			textGeometry.computeBoundingBox();
+			var mesh = new THREE.Mesh(textGeometry, material);
+			mesh.position.x = x + xOffset + unit * (i - 1);
+			mesh.position.y = 0;
+			mesh.position.z = z + zOffset;
+			mesh.rotation.x = -Math.PI / 2;
+			group.add(mesh);
+		}
+	});
+
+	return group;
 }
 
 //function animate() {
