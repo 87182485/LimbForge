@@ -26,7 +26,7 @@ var cylinder;
 
 //Grid size and step in mm
 var gridSize = 200;
-var gridStep = 10;
+var gridStep = 40; //updated for the newest version
 
 init();
 //animate();
