@@ -130,7 +130,7 @@ function onMouseMove(event) {
 
 	if (imageState.state == 'mousedown' && refImage) {
 		cylinder.scale.set(1,
-			Math.abs(imageState.worldClick.distanceTo()), 1);
+			Math.abs(imageState.worldClick.distanceTo(this)), 1);//not sure if this fixes console error. but now error is gone.
 	}
 
 }
@@ -221,7 +221,7 @@ function loadImage(imagePath) {
 				w = gridSize;
 				h = gridSize / aspect;
 			}
-			if (h > gridSize) {
+			else if (h > gridSize) {
 				h = gridSize;
 				w = gridSize / aspect;
 			}
@@ -232,7 +232,7 @@ function loadImage(imagePath) {
 			refImage = new THREE.Mesh(new THREE.PlaneGeometry(w, h), img);
 			refImage.overdraw = true;
 			refImage.rotation.set(-Math.PI * 0.5, 0, 0);
-			refImage.position.set(0, 1, 0);
+			refImage.position.set(0, .1, 0);
 
 			refImage.originalWidth = texture.image.width;
 			refImage.originalHeight = texture.image.height;
