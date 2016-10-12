@@ -77,7 +77,8 @@ function init() {
     var gridHelper = new THREE.GridHelper(gridSize, gridStep); // THREE.GridHelper(size,step)
     scene.add(gridHelper);
 
-	scene.add(LimbForge.createRuler(0));
+	scene.add(LimbForge.createRuler(0, false));//draw a ruler on x-axis
+	scene.add(LimbForge.createRuler(0, true));//draw a ruler on y-axis
 
     container.appendChild(renderer.domElement);
 
